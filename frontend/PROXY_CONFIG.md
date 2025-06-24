@@ -1,71 +1,66 @@
-# Proxy Configuration Documentation
-
-This document explains how the proxy configuration works for both development and production environments.
+# Backend PDF Conversion Setup
 
 ## Overview
 
-The application needs to make requests to an external PDF converter service. Due to CORS restrictions, we use a proxy approach.
+The application now uses a backend route to handle PDF conversion instead of frontend proxies. This approach is cleaner, more secure, and eliminates CORS issues.
 
-## Configuration
+## Implementation
 
-### Development (Vite)
-- Uses Vite's built-in proxy configuration in `vite.config.js`
-- Routes `/proxy` requests to the external service
-- Direct proxy without serverless function overhead
+### Frontend Changes
+- Updated `UploadForm.jsx` to call `/api/convert-to-pdf` on your backend
+- Removed axios import (using customAxios for all requests)
+- Simplified code - no environment-specific logic needed
 
-### Production (Vercel)
-- Uses Vercel serverless function at `/api/pdf-converter.js`
-- Vercel rewrites `/proxy` to `/api/pdf-converter` via `vercel.json`
-- Handles CORS and error handling server-side
+### Backend Route Required
+You need to add a route in your backend server:
 
-## Files Modified
+```javascript
+// POST /api/convert-to-pdf
+app.post('/api/convert-to-pdf', async (req, res) => {
+  try {
+    const response = await fetch(
+      'https://resumeconvertorlatex.onrender.com/api/convertJsonTexToPdfLocally',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req.body),
+      }
+    );
 
-1. **vercel.json**: Added rewrite rule for `/proxy` → `/api/pdf-converter`
-2. **UploadForm.jsx**: Simplified to always use `/proxy` endpoint
-3. **axios.js**: Made base URL environment-aware
-4. **pdf-converter.js**: Enhanced error handling and logging
-5. **.env.example**: Added environment variable examples
-
-## Environment Variables
-
-### Optional Variables:
-- `VITE_API_BASE_URL`: Override default API base URL
-- `PDF_CONVERTER_URL`: Override external PDF converter URL
-
-## How It Works
-
-### Development Flow:
-1. Frontend makes request to `/proxy`
-2. Vite proxy forwards to external service
-3. Response returned directly
-
-### Production Flow:
-1. Frontend makes request to `/proxy`
-2. Vercel rewrite routes to `/api/pdf-converter`
-3. Serverless function proxies to external service
-4. Response returned through serverless function
+    const data = await response.json();
+    
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: 'PDF conversion failed',
+        details: data
+      });
+    }
+    
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to convert PDF',
+      details: error.message
+    });
+  }
+});
+```
 
 ## Benefits
 
-- **Consistent API**: Same `/proxy` endpoint in both environments
-- **CORS Handling**: Server-side proxy eliminates CORS issues
-- **Error Handling**: Centralized error handling and logging
-- **Environment Flexibility**: Easy to switch between local/production APIs
-- **Security**: API keys and external URLs can be hidden server-side
+✅ **No CORS issues** - Server-to-server communication  
+✅ **Better security** - External API calls hidden from frontend  
+✅ **Cleaner code** - No proxy configurations needed  
+✅ **Easier debugging** - All handled in your backend  
+✅ **More reliable** - Direct backend control over external API calls  
 
-## Testing
+## Files Cleaned Up
 
-### Development:
-```bash
-npm run dev
-# Test the /proxy endpoint
-```
+- Removed Vite proxy configuration
+- Removed Vercel serverless function
+- Simplified frontend code
+- No more environment-specific proxy logic
 
-### Production:
-```bash
-npm run build
-vercel dev
-# Test the same /proxy endpoint
-```
-
-Both should work identically from the frontend perspective.
+See `BACKEND_ROUTE_EXAMPLE.js` for the complete implementation example.
