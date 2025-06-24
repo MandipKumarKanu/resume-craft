@@ -3,6 +3,7 @@ const pdfjsLib = require("pdfjs-dist/legacy/build/pdf");
 const path = require('path');
 const axios = require('axios');
 const Counter = require('../models/Counter');
+const fileCleanupService = require('../services/fileCleanupService');
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = path.join(__dirname, '../node_modules/pdfjs-dist/legacy/build/pdf.worker.js');
 
@@ -43,7 +44,7 @@ const pdfUpload = async (req, res) => {
         resource_type: 'raw',
         format: fileExtension
       },
-      (error, result) => {
+      async (error, result) => {
         if (error) {
           console.error('Upload to Cloudinary failed:', error);
           return res.status(500).json({
@@ -64,6 +65,21 @@ const pdfUpload = async (req, res) => {
           Counter.incrementCounter('total_cv_count').catch(err => {
             console.error('Error incrementing CV count:', err);
           });
+        }
+
+        // Track file for auto-deletion after 1 hour
+        try {
+          await fileCleanupService.trackFile(
+            result.public_id,
+            req.file.originalname,
+            fileExtension,
+            result.secure_url,
+            null, // userEmail (optional)
+            req.file.size
+          );
+        } catch (trackError) {
+          console.error('❌ Error tracking file for cleanup:', trackError);
+          // Don't fail the upload if tracking fails
         }
 
         return res.json({

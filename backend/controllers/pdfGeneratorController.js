@@ -4,6 +4,7 @@ const latex = require("node-latex");
 const { promisify } = require("util");
 const cloudinary = require("../utils/cloudinary");
 const Counter = require('../models/Counter');
+const fileCleanupService = require('../services/fileCleanupService');
 require("dotenv").config();
 
 const writeFileAsync = promisify(fs.writeFile);
@@ -72,6 +73,21 @@ const convertJsonTexToPdfLocally = async (req, res) => {
     });
 
     console.log("Upload successful:", uploadResult.secure_url);
+
+    // Track generated PDF for auto-deletion after 1 hour
+    try {
+      await fileCleanupService.trackFile(
+        uploadResult.public_id,
+        `${name}_${title}_resume.pdf`,
+        'generated_pdf',
+        uploadResult.secure_url,
+        email, // userEmail for tracking
+        null // fileSize (we could get this from the generated PDF)
+      );
+    } catch (trackError) {
+      console.error('❌ Error tracking generated PDF for cleanup:', trackError);
+      // Don't fail the generation if tracking fails
+    }
 
     try {
       await Counter.incrementCounter('total_cv_count');
