@@ -28,6 +28,44 @@ router.post("/convertJsonTexToPdfLocally", convertJsonTexToPdfLocally);
 router.get("/getCount", getCount);
 router.post("/resetCount", resetCount);
 
+router.post('/convert-to-pdf', async (req, res) => {
+  try {
+    console.log('Converting LaTeX to PDF...');
+    
+    const response = await fetch(
+      'https://resumeconvertorlatex.onrender.com/api/convertJsonTexToPdfLocally',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(req.body),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('PDF conversion failed:', errorData);
+      return res.status(response.status).json({
+        error: 'PDF conversion failed',
+        details: errorData
+      });
+    }
+
+    const pdfData = await response.json();
+    console.log('PDF conversion successful');
+    
+    res.json(pdfData);
+  } catch (error) {
+    console.error('PDF conversion error:', error);
+    res.status(500).json({
+      error: 'Failed to convert PDF',
+      details: error.message
+    });
+  }
+});
+
 router.get("/ping-db", async (req, res) => {
   try {
     if (mongoose.connection.readyState !== 1) {
