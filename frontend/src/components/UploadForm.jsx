@@ -155,12 +155,14 @@ const UploadForm = () => {
 
       console.log("Step 3: Uploading LaTeX content and converting to PDF...");
 
+      // const pdfConverterUrl = process.env.NODE_ENV === 'development' 
+      //   ? "/api/proxy/convertJsonTexToPdfLocally"
+      //   : "/proxy";
+      const pdfConverterUrl = "/proxy/api/convertJsonTexToPdfLocally"
+
       const [uploadTexResponse, pdfConversionResponse] = await Promise.all([
         customAxios.post("/api/upload-tex-content", conversionResponse.data),
-        axios.post(
-          "https://resumeconvertorlatex.onrender.com/api/convertJsonTexToPdfLocally",
-          conversionResponse.data
-        ),
+        axios.post(pdfConverterUrl, conversionResponse.data),
       ]);
 
       console.log("LaTeX upload successful:", uploadTexResponse.data);

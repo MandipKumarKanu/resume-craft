@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const customAxios = axios.create({
-  baseURL: 'https://resume-craft-rouge.vercel.app/',
+  baseURL: 'http://localhost:5000/',
   timeout: 30000, 
   headers: {
     'Content-Type': 'application/json',
