@@ -17,10 +17,7 @@ const convertJsonTexToPdfLocally = async (req, res) => {
   }
 
   try {
-    const outputDir = path.resolve("pdfs");
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
+    const outputDir = path.resolve("/tmp");
 
     const timestamp = Date.now();
     const texFilePath = path.join(outputDir, `resume_${timestamp}.tex`);
