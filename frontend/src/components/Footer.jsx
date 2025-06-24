@@ -46,7 +46,7 @@ const Footer = () => {
                 Your files are processed securely and automatically deleted
                 after{" "}
                 <span className="text-emerald-400 font-semibold">
-                  5 minutes
+                  1 Hour
                 </span>
                 . We use end-to-end encryption and never store your personal
                 data. Your privacy is our priority.
