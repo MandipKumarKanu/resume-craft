@@ -35,74 +35,100 @@ const generateCVLatexTemplateV1 = (cvData) => {
         return items.map(item => `  \\item ${escapeLaTeX(item)}`).join('\n');
     };
 
-    // Generate LaTeX document header
+    // Generate LaTeX document header - Modern Professional & ATS-Friendly
     const generateHeader = () => `\\documentclass[11pt,a4paper]{article}
   
-  % Required packages
+  % Essential packages for modern, ATS-friendly CV
   \\usepackage[utf8]{inputenc}
   \\usepackage[T1]{fontenc}
+  \\usepackage{lmodern}          % Better font rendering
+  \\usepackage{microtype}        % Improved typography
   \\usepackage{hyperref}
   \\usepackage{geometry}
   \\usepackage{enumitem}
   \\usepackage{titlesec}
   \\usepackage{xcolor}
+  \\usepackage{tabularx}         % Better table formatting
   
-  % Configure page margins
+  % Modern color palette - professional and ATS-safe
+  \\definecolor{primarycolor}{RGB}{47, 79, 79}      % Dark slate gray
+  \\definecolor{accentcolor}{RGB}{70, 130, 180}     % Steel blue
+  \\definecolor{textcolor}{RGB}{33, 37, 41}         % Dark gray
+  \\definecolor{lightgray}{RGB}{248, 249, 250}      % Light background
+  
+  % Optimized page margins for professional appearance
   \\geometry{
-    top=1cm,
-    bottom=1cm,
-    left=1cm,
-    right=1cm,
-    includehead,
-    includefoot
+    top=0.8in,
+    bottom=0.8in,
+    left=0.75in,
+    right=0.75in,
+    headheight=0pt,
+    headsep=0pt,
+    footskip=0.3in
   }
   
-  % Configure spacing
+  % Clean spacing configuration
   \\setlength{\\parindent}{0pt}
-  \\setlength{\\parskip}{6pt}
-  \\setlength{\\itemsep}{3pt}
-  \\setlength{\\parsep}{0pt}
-  \\setlength{\\headsep}{24pt}
-  \\setlength{\\footskip}{24pt}
+  \\setlength{\\parskip}{0pt}
+  \\setlength{\\baselineskip}{14pt}
   
-  % Configure section spacing and formatting
-  \\titleformat{\\section}{\\Large\\bfseries}{}{0em}{}[\\titlerule]
-  \\titlespacing*{\\section}
-    {0pt}  % left margin
-    {18pt} % space before
-    {8pt}  % space after
+  % Modern section formatting - ATS-friendly
+  \\titleformat{\\section}
+    {\\color{primarycolor}\\Large\\bfseries\\sffamily}
+    {}
+    {0em}
+    {}
+    [\\vspace{2pt}{\\color{accentcolor}\\titlerule[1pt]}\\vspace{4pt}]
   
-  % Configure subsection spacing and formatting
+  \\titlespacing*{\\section}{0pt}{16pt}{8pt}
+  
+  % Clean subsection formatting
   \\titleformat{\\subsection}
-    {\\bfseries}  % format
-    {}            % label
-    {0em}         % sep
-    {}            % before-code
-  \\titlespacing*{\\subsection}
-    {0pt}   % left margin
-    {12pt}  % space before
-    {6pt}   % space after
+    {\\color{primarycolor}\\large\\bfseries\\sffamily}
+    {}
+    {0em}
+    {}
   
-  % List spacing configuration
+  \\titlespacing*{\\subsection}{0pt}{10pt}{4pt}
+  
+  % Professional list formatting
   \\setlist[itemize]{
-    topsep=4pt,
-    itemsep=2pt,
-    parsep=2pt,
-    leftmargin=1.5em
+    topsep=3pt,
+    itemsep=1pt,
+    parsep=0pt,
+    leftmargin=1.2em,
+    label={\\color{accentcolor}\\textbullet}
   }
   
-  % Configure hyperlinks
+  % ATS-friendly hyperlink configuration
   \\hypersetup{
     colorlinks=true,
-    linkcolor=blue,
-    filecolor=magenta,
-    urlcolor=cyan,
-    pdfborder={0 0 0}
+    linkcolor=accentcolor,
+    filecolor=accentcolor,
+    urlcolor=accentcolor,
+    pdfborder={0 0 0},
+    pdfpagemode=UseNone,
+    pdfstartview=FitH
   }
   
-  % Custom commands
-  \\newcommand{\\cvitem}[2]{\\textbf{#1}: #2\\\\[4pt]}
-  \\newcommand{\\daterange}[2]{#1 -- #2}
+  % Modern custom commands
+  \\newcommand{\\cvitem}[2]{
+    \\noindent\\textbf{\\color{primarycolor}#1:} #2\\vspace{3pt}
+  }
+  
+  \\newcommand{\\workitem}[4]{
+    \\noindent
+    \\begin{tabularx}{\\textwidth}{@{}X@{}r@{}}
+      \\textbf{\\color{primarycolor}#1} & \\textbf{\\color{accentcolor}#4} \\\\
+      \\textit{#2} & \\textit{#3} \\\\
+    \\end{tabularx}
+    \\vspace{2pt}
+  }
+  
+  \\newcommand{\\contactsep}{\\color{lightgray}\\textbar\\color{textcolor}}
+  
+  % Set default text color
+  \\color{textcolor}
   
   \\begin{document}`;
 
@@ -112,19 +138,32 @@ const generateCVLatexTemplateV1 = (cvData) => {
             const header = cvData.cv_template.sections.header;
             if (!header) return '';
 
-            const contactParts = [];
-            if (header.contact_info.email?.value) contactParts.push(createHyperlink(header.contact_info.email.value, header.contact_info.email.link));
-            if (header.contact_info.phone?.value) contactParts.push(createHyperlink(header.contact_info.phone.value, header.contact_info.phone.link));
-            if (header.contact_info.linkedin?.value) contactParts.push(createHyperlink(header.contact_info.linkedin.value, header.contact_info.linkedin.link));
-            if (header.contact_info.portfolio?.value) contactParts.push(createHyperlink(header.contact_info.portfolio.value, header.contact_info.portfolio.link));
-            if (header.contact_info.location?.value) contactParts.push(escapeLaTeX(header.contact_info.location.value));
+            // Format contact information in a clean, ATS-friendly way
+            const contactItems = [];
+            if (header.contact_info.email?.value) {
+                contactItems.push(createHyperlink(header.contact_info.email.value, header.contact_info.email.link));
+            }
+            if (header.contact_info.phone?.value) {
+                contactItems.push(createHyperlink(header.contact_info.phone.value, header.contact_info.phone.link));
+            }
+            if (header.contact_info.location?.value) {
+                contactItems.push(escapeLaTeX(header.contact_info.location.value));
+            }
+            if (header.contact_info.linkedin?.value) {
+                contactItems.push(createHyperlink('LinkedIn', header.contact_info.linkedin.link));
+            }
+            if (header.contact_info.portfolio?.value) {
+                contactItems.push(createHyperlink('Portfolio', header.contact_info.portfolio.link));
+            }
 
             return `
+  % Professional header - ATS optimized
   \\begin{center}
-  \\textbf{\\huge ${escapeLaTeX(header.name)}}\\\\[0.5em]
-  \\textit{\\large ${escapeLaTeX(header.title)}}\\\\[0.5em]
-  ${contactParts.join(' | ')}
-  \\end{center}`;
+    {\\Huge\\bfseries\\color{primarycolor}${escapeLaTeX(header.name)}}\\\\[0.4em]
+    {\\large\\color{accentcolor}${escapeLaTeX(header.title)}}\\\\[0.6em]
+    {\\normalsize ${contactItems.join(' \\contactsep{} ')}}
+  \\end{center}
+  \\vspace{8pt}`;
         },
 
         summary: () => {
@@ -132,8 +171,9 @@ const generateCVLatexTemplateV1 = (cvData) => {
             if (!summary || !summary.content) return '';
 
             return `
-  \\section{${escapeLaTeX(summary.section_title)}}
-  ${escapeLaTeX(summary.content)}`;
+  \\section{${escapeLaTeX(summary.section_title || 'Professional Summary')}}
+  \\noindent ${escapeLaTeX(summary.content)}
+  \\vspace{6pt}`;
         },
 
         experience: () => {
@@ -143,20 +183,30 @@ const generateCVLatexTemplateV1 = (cvData) => {
             const experienceItems = experience.items.map(job => {
                 const startDate = job.dates?.start ? formatDate(job.dates.start) : '';
                 const endDate = job.dates?.is_current ? 'Present' : (job.dates?.end ? formatDate(job.dates.end) : '');
+                const dateRange = (startDate || endDate) ? `${startDate}${startDate && endDate ? ' -- ' : ''}${endDate}` : '';
 
-                return `
-\\subsection*{${createHyperlink(job.company || '', job.url || '')}${job.location ? ` -- ${escapeLaTeX(job.location)}` : ''}}
-\\textit{${escapeLaTeX(job.title || '')}} \\hfill ${startDate}${startDate || endDate ? ' -- ' : ''}${endDate}
+                let jobContent = '';
+                
+                // Use modern work item format
+                if (job.company && job.title) {
+                    jobContent += `\\workitem{${escapeLaTeX(job.title)}}{${createHyperlink(job.company, job.url || '')}}{${escapeLaTeX(job.location || '')}}{${dateRange}}\n`;
+                }
 
-${job.achievements?.length ? `\\begin{itemize}[leftmargin=*]
-${createListItems(job.achievements)}
-\\end{itemize}` : ''}
+                // Add achievements in a clean format
+                if (job.achievements?.length) {
+                    jobContent += `\\begin{itemize}[topsep=2pt]\n${createListItems(job.achievements)}\n\\end{itemize}\n`;
+                }
 
-${job.technologies?.length ? `\\textbf{Technologies:} ${job.technologies.map(tech => escapeLaTeX(tech || '')).join(' | ')}` : ''}`
-            }).join('\n\n');
+                // Add technologies in a professional format
+                if (job.technologies?.length) {
+                    jobContent += `\\textbf{\\color{primarycolor}Technologies:} ${job.technologies.map(tech => escapeLaTeX(tech || '')).join(' | ')}\n`;
+                }
+
+                return jobContent + '\\vspace{6pt}';
+            }).join('\n');
 
             return `
-  \\section{${escapeLaTeX(experience.section_title || 'Experience')}}
+  \\section{${escapeLaTeX(experience.section_title || 'Professional Experience')}}
   ${experienceItems}`;
         },
 
@@ -167,15 +217,25 @@ ${job.technologies?.length ? `\\textbf{Technologies:} ${job.technologies.map(tec
             const educationItems = education.items.map(edu => {
                 const startDate = edu.dates?.start ? formatDate(edu.dates.start) : '';
                 const endDate = edu.dates?.end ? formatDate(edu.dates.end) : '';
+                const dateRange = (startDate || endDate) ? `${startDate}${startDate && endDate ? ' -- ' : ''}${endDate}` : '';
 
-                return `
-\\subsection*{${createHyperlink(edu.institution || '', edu.url || '')}${edu.location ? ` -- ${escapeLaTeX(edu.location)}` : ''}}
-\\textit{${escapeLaTeX(edu.degree || '')}} \\hfill ${startDate}${startDate || endDate ? ' -- ' : ''}${endDate}
-${edu.gpa ? `\\\\GPA: ${escapeLaTeX(edu.gpa)}` : ''}
-${edu.honors?.length ? `\\begin{itemize}[leftmargin=*]
-${createListItems(edu.honors)}
-\\end{itemize}` : ''}`
-            }).join('\n\n');
+                let eduContent = '';
+                
+                // Format education entry professionally
+                eduContent += `\\workitem{${escapeLaTeX(edu.degree || '')}}{${createHyperlink(edu.institution || '', edu.url || '')}}{${escapeLaTeX(edu.location || '')}}{${dateRange}}\n`;
+
+                // Add GPA if available
+                if (edu.gpa) {
+                    eduContent += `\\textbf{\\color{primarycolor}GPA:} ${escapeLaTeX(edu.gpa)}\\vspace{2pt}\n`;
+                }
+
+                // Add honors/achievements
+                if (edu.honors?.length) {
+                    eduContent += `\\begin{itemize}[topsep=2pt]\n${createListItems(edu.honors)}\n\\end{itemize}\n`;
+                }
+
+                return eduContent + '\\vspace{6pt}';
+            }).join('\n');
 
             return `
   \\section{${escapeLaTeX(education.section_title || 'Education')}}
@@ -186,15 +246,28 @@ ${createListItems(edu.honors)}
             const skills = cvData.cv_template.sections.skills;
             if (!skills || !skills.categories || !skills.categories.length) return '';
 
-            const skillCategories = skills.categories.map(category => `
-  \\subsection*{${escapeLaTeX(category.name)}}
-  ${category.description ? `${escapeLaTeX(category.description)}\\\\[0.5em]` : ''}
-  ${category.items && category.items.length ? category.items.map(skill => escapeLaTeX(skill)).join(' | ') : ''}`
-            ).join('\n\n');
+            const skillCategories = skills.categories.map(category => {
+                let categoryContent = '';
+                
+                if (category.name) {
+                    categoryContent += `\\textbf{\\color{primarycolor}${escapeLaTeX(category.name)}:} `;
+                }
+                
+                if (category.items && category.items.length) {
+                    categoryContent += category.items.map(skill => escapeLaTeX(skill)).join(', ');
+                }
+                
+                if (category.description && !category.items?.length) {
+                    categoryContent += escapeLaTeX(category.description);
+                }
+                
+                return categoryContent;
+            }).filter(content => content).join('\\\\[4pt]\n');
 
             return `
-  \\section{${escapeLaTeX(skills.section_title)}}
-  ${skillCategories}`;
+  \\section{${escapeLaTeX(skills.section_title || 'Technical Skills')}}
+  \\noindent ${skillCategories}
+  \\vspace{6pt}`;
         },
 
         projects: () => {
@@ -202,28 +275,41 @@ ${createListItems(edu.honors)}
             if (!projects || !projects.items || !projects.items.length) return '';
 
             const projectItems = projects.items.map(project => {
-                // Add null checks for dates
                 const startDate = project.dates?.start ? formatDate(project.dates.start) : '';
                 const endDate = project.dates?.end ? formatDate(project.dates.end) : '';
-                const dateString = (startDate || endDate) ? `${startDate}${startDate && endDate ? ' -- ' : ''}${endDate}` : '';
+                const dateRange = (startDate || endDate) ? `${startDate}${startDate && endDate ? ' -- ' : ''}${endDate}` : '';
                 
-                return `
-\\subsection*{${createHyperlink(project.title || '', project.url || '')}}`
-+ (dateString ? `\n${dateString}` : '') + `
+                let projectContent = '';
+                
+                // Project title and date
+                projectContent += `\\subsection{${createHyperlink(project.title || '', project.url || '')}}`;
+                if (dateRange) {
+                    projectContent += `\\hfill {\\color{accentcolor}\\textit{${dateRange}}}\n`;
+                } else {
+                    projectContent += '\n';
+                }
+                
+                // Project description
+                if (project.description) {
+                    projectContent += `\\noindent ${escapeLaTeX(project.description)}\n`;
+                }
 
-\\raggedright
-${escapeLaTeX(project.description || '')}
+                // Key contributions
+                if (project.key_contributions?.length) {
+                    projectContent += `\\begin{itemize}[topsep=2pt]\n${createListItems(project.key_contributions)}\n\\end{itemize}\n`;
+                }
 
-${project.key_contributions?.length ? `\\begin{itemize}[leftmargin=*]
-${createListItems(project.key_contributions)}
-\\end{itemize}` : ''}
+                // Technologies used
+                if (project.technologies?.length) {
+                    projectContent += `\\textbf{\\color{primarycolor}Technologies:} ${project.technologies.map(tech => escapeLaTeX(tech || '')).join(', ')}\n`;
+                }
 
-${project.technologies?.length ? `\\textbf{Technologies:} ${project.technologies.map(tech => escapeLaTeX(tech || '')).join(' | ')}` : ''}`
-            }).join('\n\n');
+                return projectContent + '\\vspace{6pt}';
+            }).join('\n');
 
             return `
-\\section{${escapeLaTeX(projects.section_title || 'Projects')}}
-${projectItems}`;
+  \\section{${escapeLaTeX(projects.section_title || 'Projects')}}
+  ${projectItems}`;
         },
 
         certifications: () => {
@@ -233,13 +319,15 @@ ${projectItems}`;
             const certItems = certifications.items.map(cert => {
                 const startDate = cert.date?.start ? formatDate(cert.date.start) : '';
                 const endDate = cert.date?.end ? formatDate(cert.date.end) : 'Present';
+                const dateInfo = startDate || endDate ? ` (${startDate}${startDate && endDate !== 'Present' ? ' - ' : ''}${endDate})` : '';
 
-                return `\\cvitem{${createHyperlink(cert.title || '', cert.url || '')}}{${escapeLaTeX(cert.institution || '')}${startDate || endDate ? ` (${startDate}${startDate && endDate ? ' - ' : ''}${endDate})` : ''}}`
+                return `\\cvitem{${createHyperlink(cert.title || '', cert.url || '')}}{${escapeLaTeX(cert.institution || '')}${dateInfo}}`;
             }).join('\n');
 
             return `
-\\section{${escapeLaTeX(certifications.section_title || 'Certifications')}}
-${certItems}`;
+  \\section{${escapeLaTeX(certifications.section_title || 'Certifications')}}
+  ${certItems}
+  \\vspace{6pt}`;
         },
 
         courses: () => {

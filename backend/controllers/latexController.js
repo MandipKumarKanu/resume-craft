@@ -366,9 +366,9 @@ const ConvertLatex = async (req, res) => {
     console.log("Processing AI response");
 
     latexContent = latexContent
-      .replace(/```json\n?/g, "") 
-      .replace(/```\n?/g, "") 
-      .trim(); 
+      .replace(/```json\n?/g, "")
+      .replace(/```\n?/g, "")
+      .trim();
 
     console.log(
       "Cleaned AI response (first 500 chars):",
@@ -384,7 +384,7 @@ const ConvertLatex = async (req, res) => {
       console.error("Raw response:", latexContent);
       return res.status(500).json({
         error: "Failed to parse AI response as JSON: " + parseError.message,
-        rawResponse: latexContent.substring(0, 1000), 
+        rawResponse: latexContent.substring(0, 1000),
       });
     }
 
@@ -425,8 +425,10 @@ const ConvertLatex = async (req, res) => {
 
     let formattedLatex;
     try {
-      if (template === "v2") {
+      if (template === "v2_new") {
         formattedLatex = generateCVLatexTemplate2_new(parsedData);
+      } else if (template === "v2") {
+        formattedLatex = generateCVLatexTemplateV2(parsedData);
       } else if (template === "v1") {
         formattedLatex = generateCVLatexTemplateV1(parsedData);
       } else {
@@ -436,7 +438,7 @@ const ConvertLatex = async (req, res) => {
       console.error("Error generating LaTeX template:", templateError);
       return res.status(500).json({
         error: "Failed to generate LaTeX template: " + templateError.message,
-        parsedData: parsedData, 
+        parsedData: parsedData,
       });
     }
 

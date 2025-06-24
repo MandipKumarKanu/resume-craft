@@ -38,9 +38,10 @@ const generateCVLatexTemplateV2 = (cvData) => {
     return items.map((item) => `  \\item ${escapeLaTeX(item)}`).join("\n");
   };
 
-  // Generate LaTeX document header
+  // Generate LaTeX document header - Academic Excellence (Fixed)
   const generateHeader = () => `\\documentclass[letterpaper,11pt]{article}
 
+% Academic-focused packages
 \\usepackage{latexsym}
 \\usepackage[empty]{fullpage}
 \\usepackage{titlesec}
@@ -54,6 +55,16 @@ const generateCVLatexTemplateV2 = (cvData) => {
 \\usepackage{tabularx}
 \\usepackage{fontawesome5}
 \\usepackage{multicol}
+\\usepackage{amsmath,amsfonts,amssymb}  % Mathematical symbols for research
+\\usepackage{cite}                      % Citation support
+\\usepackage{url}                       % URL handling
+\\usepackage{microtype}                 % Better typography
+
+% Academic color scheme
+\\definecolor{academicblue}{RGB}{25, 55, 135}
+\\definecolor{academicgray}{RGB}{85, 85, 85}
+\\definecolor{lightacademic}{RGB}{245, 247, 250}
+
 \\setlength{\\multicolsep}{-3.0pt}
 \\setlength{\\columnsep}{-1pt}
 \\input{glyphtounicode}
@@ -64,12 +75,12 @@ const generateCVLatexTemplateV2 = (cvData) => {
 \\renewcommand{\\headrulewidth}{0pt}
 \\renewcommand{\\footrulewidth}{0pt}
 
-% Adjust margins
-\\addtolength{\\oddsidemargin}{-0.6in}
+% Academic-optimized margins
+\\addtolength{\\oddsidemargin}{-0.5in}
 \\addtolength{\\evensidemargin}{-0.5in}
-\\addtolength{\\textwidth}{1.19in}
-\\addtolength{\\topmargin}{-.7in}
-\\addtolength{\\textheight}{1.4in}
+\\addtolength{\\textwidth}{1.0in}
+\\addtolength{\\topmargin}{-.6in}
+\\addtolength{\\textheight}{1.2in}
 
 \\urlstyle{same}
 
@@ -77,25 +88,28 @@ const generateCVLatexTemplateV2 = (cvData) => {
 \\raggedright
 \\setlength{\\tabcolsep}{0in}
 
-% Sections formatting
+% Academic sections formatting
 \\titleformat{\\section}{
-  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries
-}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
+  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries\\color{academicblue}
+}{}{0em}{}[\\color{academicgray}\\titlerule \\vspace{-5pt}]
 
+% Academic item formatting
 \\newcommand{\\resumeItem}[1]{
   \\item\\small{
     {#1 \\vspace{-2pt}}
   }
 }
 
+% Academic position formatting (Fixed)
 \\newcommand{\\resumeSubheading}[4]{
   \\vspace{-2pt}\\item
-    \\begin{tabularx}{\\textwidth}{X r}
-      \\textbf{#1} \\newline \\textit{\\small #3} & \\textbf{\\small #2} \\newline 
-      \\textit{\\small #4} \\\\
-    \\end{tabularx}\\vspace{-7pt}
+    \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
+      \\textbf{#1} & \\textbf{\\small #2} \\\\
+      \\textit{\\small #3} & \\textit{\\small #4} \\\\
+    \\end{tabular*}\\vspace{-7pt}
 }
 
+% Project entry formatting
 \\newcommand{\\projectEntry}[2]{
   \\vspace{-2pt}\\item
     \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
@@ -103,15 +117,17 @@ const generateCVLatexTemplateV2 = (cvData) => {
     \\end{tabular*}\\vspace{-7pt}
 }
 
+% Academic paragraph
 \\newcommand{\\resumeParagraph}[1]{
   \\item\\small{
     \\begin{flushleft}
       #1
     \\end{flushleft}
-    \\vspace{-10pt}
+    \\vspace{-8pt}
   }
 }
 
+% Academic list environments (Fixed)
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.0in, label={}]}
 \\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
 \\newcommand{\\resumeItemListStart}{\\begin{itemize}}
@@ -126,75 +142,62 @@ const generateCVLatexTemplateV2 = (cvData) => {
       const header = cvData.cv_template.sections.header;
       if (!header) return "";
 
-      // Safely extract values with fallbacks
+      // Academic header with credentials
       const email = header.contact_info?.email?.value || "";
       const phone = header.contact_info?.phone?.value || "";
       const linkedin = header.contact_info?.linkedin?.value || "";
       const portfolio = header.contact_info?.portfolio?.value || "";
-      const github = header.contact_info?.github?.value || "";
+      const orcid = header.contact_info?.orcid?.value || ""; // Academic ORCID
+      const researchgate = header.contact_info?.researchgate?.value || "";
       const location = header.contact_info?.location?.value || "";
       const name = header.name || "Name Not Provided";
+      const title = header.title || "";
+      const credentials = header.credentials || ""; // PhD, etc.
 
-      // Helper function to create safe hyperlinks
-      const createSafeLink = (text, link) => {
+      // Academic-specific contact formatting
+      const createAcademicLink = (text, link, icon) => {
         if (!text || !link) return "";
-        const cleanLink = link.replace(/^https?:\/\//, ""); // Remove protocol if exists
-        return `\\href{${link}}{\\raisebox{-0.2\\height}\\faLinkedin\\ \\underline{${escapeLaTeX(
-          cleanLink
-        )}}}`;
+        const cleanLink = link.replace(/^https?:\/\//, "");
+        return `\\href{${link}}{\\raisebox{-0.2\\height}${icon}\\ \\underline{${escapeLaTeX(cleanLink)}}}`;
       };
 
-      // Build contact sections conditionally
       const contactSections = [];
 
       if (phone) {
-        contactSections.push(
-          `\\raisebox{-0.1\\height}\\faPhone\\ ${escapeLaTeX(phone)}`
-        );
+        contactSections.push(`\\raisebox{-0.1\\height}\\faPhone\\ ${escapeLaTeX(phone)}`);
       }
 
       if (email) {
-        contactSections.push(
-          `\\href{mailto:${email}}{\\raisebox{-0.2\\height}\\faEnvelope\\  \\underline{${escapeLaTeX(
-            email
-          )}}}`
-        );
+        contactSections.push(`\\href{mailto:${email}}{\\raisebox{-0.2\\height}\\faEnvelope\\  \\underline{${escapeLaTeX(email)}}}`);
       }
 
       if (linkedin) {
-        const linkedinLink = linkedin.startsWith("http")
-          ? linkedin
-          : `https://${linkedin}`;
-        contactSections.push(createSafeLink(linkedin, linkedinLink));
+        const linkedinLink = linkedin.startsWith("http") ? linkedin : `https://${linkedin}`;
+        contactSections.push(createAcademicLink(linkedin, linkedinLink, "\\faLinkedin"));
       }
+
+      if (orcid) {
+        const orcidLink = orcid.startsWith("http") ? orcid : `https://orcid.org/${orcid}`;
+        contactSections.push(createAcademicLink("ORCID", orcidLink, "\\faOrcid"));
+      }
+
+      if (researchgate) {
+        const rgLink = researchgate.startsWith("http") ? researchgate : `https://researchgate.net/profile/${researchgate}`;
+        contactSections.push(createAcademicLink("ResearchGate", rgLink, "\\faResearchgate"));
+      }
+
       if (portfolio) {
-        const portfolioLink = portfolio.startsWith("http")
-          ? portfolio
-          : `https://${portfolio}`;
-        contactSections.push(
-          `\\href{${portfolioLink}}{\\raisebox{-0.2\\height}\\faGlobe\\ \\underline{${escapeLaTeX(
-            portfolio
-          )}}}`
-        );
+        const portfolioLink = portfolio.startsWith("http") ? portfolio : `https://${portfolio}`;
+        contactSections.push(createAcademicLink("Portfolio", portfolioLink, "\\faGlobe"));
       }
 
-      if (github) {
-        const githubLink = github.startsWith("http")
-          ? github
-          : `https://${github}`;
-        const cleanGithubLink = githubLink.replace(/^https?:\/\//, "");
-        contactSections.push(
-          `\\href{${githubLink}}{\\raisebox{-0.2\\height}\\faGithub\\ \\underline{${escapeLaTeX(
-            cleanGithubLink
-          )}}}`
-        );
-      }
-
+      // Academic header format
       return `
 \\begin{center}
-    {\\Huge \\scshape ${escapeLaTeX(name)}} \\\\ \\vspace{1pt}
-    ${location ? `${escapeLaTeX(location)} \\\\ \\vspace{1pt}` : ""}
-    ${contactSections.length ? `\\small ${contactSections.join(" ~ ")}` : ""}
+    {\\Huge \\bfseries \\color{academicblue} ${escapeLaTeX(name)}}${credentials ? `\\\\[2pt] {\\large ${escapeLaTeX(credentials)}}` : ""} \\\\[4pt]
+    ${title ? `{\\large \\color{academicgray} ${escapeLaTeX(title)}} \\\\[2pt]` : ""}
+    ${location ? `{\\normalsize ${escapeLaTeX(location)}} \\\\[2pt]` : ""}
+    ${contactSections.length ? `{\\small ${contactSections.join(" ~ ")}}` : ""}
     \\vspace{-8pt}
 \\end{center}`;
     },
@@ -204,7 +207,7 @@ const generateCVLatexTemplateV2 = (cvData) => {
       if (!summary || !summary.content) return "";
 
       return `
-  \\section{${escapeLaTeX(summary.section_title)}}
+\\section{${escapeLaTeX(summary.section_title || "Research Summary")}}
 \\resumeSubHeadingListStart
     \\resumeParagraph{${escapeLaTeX(summary.content)}}
 \\resumeSubHeadingListEnd`;
@@ -219,10 +222,8 @@ const generateCVLatexTemplateV2 = (cvData) => {
           if (!job) return "";
 
           const startDate = formatDate(job.dates?.start);
-          const endDate = job.dates?.is_current
-            ? "Present"
-            : formatDate(job.dates?.end);
-          const company = job.company || "Company Not Specified";
+          const endDate = job.dates?.is_current ? "Present" : formatDate(job.dates?.end);
+          const company = job.company || "Institution Not Specified";
           const title = job.title || "Position Not Specified";
           const location = job.location || "";
 
@@ -247,7 +248,7 @@ const generateCVLatexTemplateV2 = (cvData) => {
       if (!experienceItems) return "";
 
       return `
-\\section{${escapeLaTeX(experience.section_title || "Experience")}}
+\\section{${escapeLaTeX(experience.section_title || "Academic \\& Professional Experience")}}
   \\resumeSubHeadingListStart
 ${experienceItems}
   \\resumeSubHeadingListEnd`;
@@ -261,35 +262,38 @@ ${experienceItems}
         .map((edu) => {
           const startDate = edu.dates?.start ? formatDate(edu.dates.start) : "";
           const endDate = edu.dates?.end ? formatDate(edu.dates.end) : "";
+          const institution = edu.institution || "Institution Not Specified";
+          const degree = edu.degree || "Degree Not Specified";
+          const location = edu.location || "";
 
-          return `
-\\subsection*{${createHyperlink(edu.institution || "", edu.url || "")}${
-            edu.location ? ` -- ${escapeLaTeX(edu.location)}` : ""
-          }}
-\\textit{${escapeLaTeX(edu.degree || "")}} \\hfill ${startDate}${
-            startDate || endDate ? " -- " : ""
-          }${endDate}
-${edu.gpa ? `\\\\GPA: ${escapeLaTeX(edu.gpa)}` : ""}
-${
-  edu.honors?.length
-    ? `\\begin{itemize}[leftmargin=*]
-${createListItems(edu.honors)}
-\\end{itemize}`
-    : ""
-}`;
+          return `    \\resumeSubheading
+      {${createHyperlink(institution, edu.url || "")}}{${startDate} -- ${endDate}}
+      {${escapeLaTeX(degree)}}{${escapeLaTeX(location)}}
+      ${edu.gpa ? `\\resumeItemListStart
+        \\resumeItem{GPA: ${escapeLaTeX(edu.gpa)}}
+      \\resumeItemListEnd` : ""}
+      ${
+        edu.honors?.length
+          ? `\\resumeItemListStart
+        ${edu.honors.map(honor => `\\resumeItem{${escapeLaTeX(honor)}}`).join("\n        ")}
+      \\resumeItemListEnd`
+          : ""
+      }`;
         })
         .join("\n\n");
 
       return `
-  \\section{${escapeLaTeX(education.section_title || "Education")}}
-  ${educationItems}`;
+\\section{Education}
+\\resumeSubHeadingListStart
+${educationItems}
+\\resumeSubHeadingListEnd`;
     },
 
     skills: () => {
       const skills = cvData.cv_template.sections.skills;
       if (!skills?.categories?.length) return "";
 
-      // Only include categories that have items
+      // Academic skills categorization
       const validCategories = skills.categories.filter(
         (category) =>
           category?.items?.length &&
@@ -299,24 +303,24 @@ ${createListItems(edu.honors)}
       if (!validCategories.length) return "";
 
       const skillCategories = validCategories
-        .map(
-          (category) => `
-  \\subsection*{${escapeLaTeX(category.name)}}
-  ${
-    category.description
-      ? `${escapeLaTeX(category.description)}\\\\[0.5em]`
-      : ""
-  }
-  ${category.items
-    .filter(Boolean)
-    .map((skill) => escapeLaTeX(skill))
-    .join(" | ")}`
-        )
-        .join("\n\n");
+        .map((category) => {
+          const categoryName = category.name || "";
+          const skillsList = category.items
+            .filter(Boolean)
+            .map((skill) => escapeLaTeX(skill))
+            .join(", ");
+
+          return `\\resumeItem{\\textbf{${escapeLaTeX(categoryName)}:} ${skillsList}}`;
+        })
+        .join("\n        ");
 
       return `
-  \\section{${escapeLaTeX(skills.section_title)}}
-  ${skillCategories}`;
+\\section{${escapeLaTeX(skills.section_title || "Technical Skills \\& Competencies")}}
+\\resumeSubHeadingListStart
+\\resumeItemListStart
+        ${skillCategories}
+\\resumeItemListEnd
+\\resumeSubHeadingListEnd`;
     },
 
     projects: () => {
@@ -510,24 +514,40 @@ ${awardItems}
 
     publications: () => {
       const publications = cvData.cv_template.sections.publications;
-      if (!publications || !publications.items || !publications.items.length)
-        return "";
+      if (!publications || !publications.items || !publications.items.length) return "";
 
-      const pubItems = publications.items
+      // Sort publications by date (most recent first)
+      const sortedPubs = publications.items
+        .filter(pub => pub && pub.title)
+        .sort((a, b) => {
+          const dateA = new Date(a.date || "1970-01-01");
+          const dateB = new Date(b.date || "1970-01-01");
+          return dateB - dateA;
+        });
+
+      const pubItems = sortedPubs
         .map((pub) => {
-          const date = formatDate(pub.date);
-          return `    \\item ${createHyperlink(
-            pub.title || "",
-            pub.url || ""
-          )}${date ? ` (${date})` : ""}`;
+          const year = pub.date ? new Date(pub.date).getFullYear() : "Unpublished";
+          const title = createHyperlink(pub.title, pub.url || "");
+          const journal = pub.journal || pub.venue || "";
+          const authors = pub.authors || "";
+          
+          // Academic citation format
+          let citation = `\\textbf{${title}} (${year}).`;
+          if (authors) citation += ` ${escapeLaTeX(authors)}.`;
+          if (journal) citation += ` \\textit{${escapeLaTeX(journal)}}.`;
+
+          return `\\resumeItem{${citation}}`;
         })
-        .join("\n");
+        .join("\n        ");
 
       return `
 \\section{${escapeLaTeX(publications.section_title || "Publications")}}
-\\begin{itemize}[leftmargin=*]
-${pubItems}
-\\end{itemize}`;
+\\resumeSubHeadingListStart
+\\resumeItemListStart
+        ${pubItems}
+\\resumeItemListEnd
+\\resumeSubHeadingListEnd`;
     },
 
     interests: () => {
@@ -618,17 +638,29 @@ ${patentItems}`;
       if (!research || !research.items || !research.items.length) return "";
 
       const researchItems = research.items
-        .map(
-          (item) => `
-    \\resumeSubheading
-      {${createHyperlink(item.title, item.url)}}{${formatDate(item.date)}}
-      {${escapeLaTeX(item.description)}}{}
-    `
-        )
-        .join("\n");
+        .map((item) => {
+          const startDate = item.dates?.start ? formatDate(item.dates.start) : "";
+          const endDate = item.dates?.is_current ? "Present" : (item.dates?.end ? formatDate(item.dates.end) : "");
+          const dateRange = (startDate || endDate) ? `${startDate}${startDate && endDate ? " -- " : ""}${endDate}` : "";
+
+          return `    \\resumeSubheading
+      {${createHyperlink(item.title || "", item.url || "")}}{${dateRange}}
+      {${escapeLaTeX(item.institution || item.organization || "")}}{${escapeLaTeX(item.location || "")}}
+      ${item.description ? `\\resumeItemListStart
+        \\resumeItem{${escapeLaTeX(item.description)}}
+      \\resumeItemListEnd` : ""}
+      ${
+        item.achievements?.length
+          ? `\\resumeItemListStart
+        ${item.achievements.map(achievement => `\\resumeItem{${escapeLaTeX(achievement)}}`).join("\n        ")}
+      \\resumeItemListEnd`
+          : ""
+      }`;
+        })
+        .join("\n\n");
 
       return `
-\\section{${escapeLaTeX(research.section_title)}}
+\\section{${escapeLaTeX(research.section_title || "Research Experience")}}
 \\resumeSubHeadingListStart
 ${researchItems}
 \\resumeSubHeadingListEnd`;

@@ -1,8 +1,8 @@
-// controllers/pdfController.js
 const cloudinary = require("../utils/cloudinary");
 const pdfjsLib = require("pdfjs-dist/legacy/build/pdf");
 const path = require('path');
 const axios = require('axios');
+const Counter = require('../models/Counter');
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = path.join(__dirname, '../node_modules/pdfjs-dist/legacy/build/pdf.worker.js');
 
@@ -59,6 +59,12 @@ const pdfUpload = async (req, res) => {
           resource_type: result.resource_type,
           format: result.format
         });
+
+        if (fileExtension === 'pdf') {
+          Counter.incrementCounter('total_cv_count').catch(err => {
+            console.error('Error incrementing CV count:', err);
+          });
+        }
 
         return res.json({
           url: result.secure_url,

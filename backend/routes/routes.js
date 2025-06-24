@@ -2,7 +2,7 @@ const express = require("express");
 const { pdfUpload, extractPdfData } = require("../controllers/pdfController");
 const { ConvertLatex } = require("../controllers/latexController");
 const { texContentUpload } = require("../controllers/texUploadController");
-const { convertJsonTexToPdfLocally, getCount } = require("../controllers/pdfGeneratorController");
+const { convertJsonTexToPdfLocally, getCount, resetCount } = require("../controllers/pdfGeneratorController");
 const { singleFileUpload } = require("../middleware/upload");
 
 const router = express.Router();
@@ -24,5 +24,6 @@ router.post("/upload-tex-content", texContentUpload);
 router.post("/upload-tex-file", singleFileUpload, handleUploadError, texContentUpload);
 router.post("/convertJsonTexToPdfLocally", convertJsonTexToPdfLocally);
 router.get("/getCount", getCount);
+router.post("/resetCount", resetCount);
 
 module.exports = router;
