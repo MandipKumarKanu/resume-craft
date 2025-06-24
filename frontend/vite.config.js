@@ -13,7 +13,7 @@ export default defineConfig({
       "/proxy": {
         target: "https://resumeconvertorlatex.onrender.com",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/proxy/, ""),
+        rewrite: (path) => "/api/convertJsonTexToPdfLocally",
       },
     },
   },
