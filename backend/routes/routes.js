@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const { pdfUpload, extractPdfData } = require("../controllers/pdfController");
 const { ConvertLatex } = require("../controllers/latexController");
 const { texContentUpload } = require("../controllers/texUploadController");
@@ -26,6 +27,39 @@ router.post("/upload-tex-file", singleFileUpload, handleUploadError, texContentU
 router.post("/convertJsonTexToPdfLocally", convertJsonTexToPdfLocally);
 router.get("/getCount", getCount);
 router.post("/resetCount", resetCount);
+
+router.get("/ping-db", async (req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not connected",
+        status: "disconnected",
+        readyState: mongoose.connection.readyState
+      });
+    }
+
+    await mongoose.connection.db.admin().ping();
+    
+    res.json({
+      success: true,
+      message: "Database connection is healthy",
+      status: "connected",
+      host: mongoose.connection.host,
+      name: mongoose.connection.name,
+      readyState: mongoose.connection.readyState,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Database ping failed:', error);
+    res.status(500).json({
+      success: false,
+      message: "Database ping failed",
+      error: error.message,
+      status: "error"
+    });
+  }
+});
 
 router.post("/cron/cleanup", async (req, res) => {
   try {
