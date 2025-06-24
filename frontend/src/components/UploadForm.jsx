@@ -14,7 +14,6 @@ import {
   FileInput,
 } from "lucide-react";
 import customAxios from "../config/axios";
-import axios from "axios";
 
 const UploadForm = () => {
   const navigate = useNavigate();
@@ -155,14 +154,9 @@ const UploadForm = () => {
 
       console.log("Step 3: Uploading LaTeX content and converting to PDF...");
 
-      // Use /proxy for both development and production
-      // In development: Vite proxy handles it
-      // In production: Vercel rewrite routes /proxy to /api/pdf-converter
-      const pdfConverterUrl = "/proxy";
-
       const [uploadTexResponse, pdfConversionResponse] = await Promise.all([
         customAxios.post("/api/upload-tex-content", conversionResponse.data),
-        axios.post(pdfConverterUrl, conversionResponse.data),
+        customAxios.post("/api/convert-to-pdf", conversionResponse.data),
       ]);
 
       console.log("LaTeX upload successful:", uploadTexResponse.data);

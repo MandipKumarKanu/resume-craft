@@ -8,13 +8,4 @@ export default defineConfig({
   resolve: {
     dedupe: ["react", "react-dom"],
   },
-  server: {
-    proxy: {
-      "/proxy": {
-        target: "https://resumeconvertorlatex.onrender.com",
-        changeOrigin: true,
-        rewrite: (path) => "/api/convertJsonTexToPdfLocally",
-      },
-    },
-  },
 });
